@@ -1,0 +1,2 @@
+# FastApiStudy
+FastAPI &amp; Svelte
