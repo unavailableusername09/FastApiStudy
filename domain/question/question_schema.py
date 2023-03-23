@@ -22,5 +22,10 @@ class QuestionCreate(BaseModel):
     @validator("subject","content")
     def not_empty(cls, v):
         if not v or not v.strip():
-            raise ValueError('빈 값은 허용되지 않습니다.')
+            raise ValueError('Empty values are not allowed')
         return v
+
+
+class QuestionList(BaseModel):
+    total: int = 0
+    question_list: list[Question] = []

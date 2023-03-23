@@ -6,11 +6,14 @@ from model import Question
 from sqlalchemy.orm import Session
 
 
-def get_question_list(db: Session):
-    question_list = db.query(Question) \
-        .order_by(Question.create_date.desc()) \
-        .all()
-    return question_list
+def get_question_list(db: Session, page_index: int = 0):
+    _question_list = db.query(Question) \
+        .order_by(Question.create_date)
+
+    total = _question_list.count()
+    question_list = _question_list.offset(page_index*10).limit(10).all()
+
+    return total, question_list
 
 
 def get_question(db: Session, question_id: int):
