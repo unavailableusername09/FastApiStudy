@@ -4,6 +4,7 @@
   import Detail from "./routes/Detail.svelte"
   // @ts-ignore
   import QuestionCreate from "./routes/QuestionCreate.svelte"
+  import Navigation from "./components/Navigation.svelte"
 
   const routes = {
     '/': Home,
@@ -12,4 +13,5 @@
   }
 </script>
 
+<Navigation />
 <Router {routes}/>
