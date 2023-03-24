@@ -2,28 +2,32 @@
 
     import fastapi from "../lib/api"
     import { link } from 'svelte-spa-router'
+    import { page } from "../lib/store"
+    // @ts-ignore
+    import moment from 'moment/min/moment-with-locales'
+    moment.locale('ko')
 
 
     let question_list = []
-    let page_index = 0
+    let size = 10
     let total = 0
-    let total_page_list = Array(Math.ceil(total/10))
+    //let total_page_list = Array(Math.ceil(total/10))
     $: total_page = Math.ceil(total/10)
 
     function get_question_list(_page) {
         let params = {
-            page_index: _page
+            page: _page
         }
         fastapi('get', '/api/question/list',params, (json) => {
             question_list = json.question_list
-            page_index = _page
-            total = json
+            $page = _page
+            total = json.total
         })
         
     }
     
 
-    get_question_list(0)
+    $: get_question_list($page)
 </script>
 
 <div class="container my-3">
@@ -38,11 +42,14 @@
         <tbody>
         {#each question_list as question, i}
         <tr>
-            <td>{i+1}</td>
+            <td>{($page * size) + i+1}</td>
             <td>
                 <a use:link href="/detail/{question.id}">{question.subject}</a>
+                {#if question.answers.length > 0 }
+                <span class="text-danger small mx-2">{question.answers.length}</span>
+                {/if}
             </td>
-            <td>{question.create_date}</td>
+            <td>{moment(question.create_date).format("YYYY년 MM월 DD일 a hh:mm")}</td>
         </tr>
         {/each}
         </tbody>
@@ -50,19 +57,20 @@
     <!-- 페이징처리 시작 -->
     <ul class="pagination justify-content-center">
         <!-- 이전페이지 -->
-        <li class="page-item {page_index <= 0 && 'disabled'}">
-            <button class="page-link" on:click="{() => get_question_list(page_index-1)}">이전</button>
+        <li class="page-item {$page <= 0 && 'disabled'}">
+            <button class="page-link" on:click="{() => get_question_list($page-1)}">이전</button>
         </li>
         <!-- 페이지번호 -->
-        {#each total_page_list as loop_page}
-        {console.log(loop_page)}
-            <li class="page-item {loop_page === page_index && 'active'}">
-                <button on:click="{() => get_question_list(loop_page)}" class="page-link">{loop_page+1}</button>
-            </li>
+        {#each Array(total_page) as _, loop_page}
+        {#if loop_page >= $page-5 && loop_page <= $page+5} 
+        <li class="page-item {loop_page === $page && 'active'}">
+            <button on:click="{() => get_question_list(loop_page)}" class="page-link">{loop_page+1}</button>
+        </li>
+        {/if}
         {/each}
         <!-- 다음페이지 -->
-        <li class="page-item {page_index >= total_page-1 && 'disabled'}">
-            <button class="page-link" on:click="{() => get_question_list(page_index+1)}">다음</button>
+        <li class="page-item {$page >= total_page-1 && 'disabled'}">
+            <button class="page-link" on:click="{() => get_question_list($page+1)}">다음</button>
         </li>
     </ul>
     <!-- 페이징처리 끝 -->
