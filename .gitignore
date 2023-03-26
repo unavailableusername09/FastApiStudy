@@ -2,3 +2,4 @@
 .idea
 __pycache__
 token_properties.py
+fastApiStudy.db
